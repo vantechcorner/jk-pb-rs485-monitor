@@ -1,0 +1,55 @@
+---
+description: Lab context for JK-PB RS485 monitoring (always apply)
+alwaysApply: true
+---
+
+# JK-PB RS485 Monitor — lab context
+
+## Hardware (field-tested)
+
+- BMS **JK-PB1A16S10P** (8–16S capable, 1 A active balance, 100 A continuous class).
+- Research pack: **24 V 8S** ~50 Ah — Modbus read verified on UART1.
+- Same BMS family on ESS **16S 51.2 V 100 Ah** with Deye: inverter link is **CAN**; use sister Deye monitor for system SOC/V/I.
+
+## I/O board (left → right)
+
+1. **RS485** (UART1) — Modbus monitor port ← Waveshare USB-RS485 / future ESP32  
+2. **CAN** — inverter protocol (app e.g. `001` Deye / `011` Luxpower) — **not** Modbus  
+3. Middle RJ45 — pads TX/RX + 485-A/B (hybrid)  
+4. **RS485-P** ×2 — UART3 parallel (`015`)
+
+RJ45 RS485 pinout: **1/8 = B**, **2/7 = A**, **3/6 = GND**. Swap A/B if silent.
+
+## App settings (verified)
+
+| Setting | Value |
+|---------|--------|
+| Device Address | **15** |
+| UART1 / UART2 | **001** – JK BMS RS485 Modbus V1.0 |
+| UART3 | **015** – parallel |
+| Baud for `001` | **115200** (`013` = same map @ 9600) |
+
+## Modbus map notes
+
+- Docs use byte-stride addresses (`0x1200`, `0x1202`, …). Word index in a block: `(addr - start) // 2`.
+- Pack V `0x1290` u32 ×0.001 V; current `0x1298` s32 ×0.001 A; power `0x1294` s32 ×0.001 W.
+- SOC = **low byte** of `0x12A6` (high byte = balance state).
+- Cells: `0x1200 + 2*n`, u16 mV.
+
+## Key files
+
+- `jk-pb-modbus-read.py` — PC Modbus **master** (`--cells 8`, `--full`, `--trace`)
+- `jkbms-iriv-ioc-config.json` / `_gen_jkbms_iriv_jobs.py` (self-contained; regenerates in place)
+- Photos: `docs/images/jk-*.jpg|png`
+- `docs/HANDOFF.md` — full narrative
+- `docs/esp32/README.md` — planned ESP32 master stub
+
+## IRIV
+
+- MQTT base `iriv/jkbms`, slave 15, baud 115200.
+- Pack V/I/P use **u32/s32** (`dataType` 4/5, `count=2`) — confirm UINT32/INT32 in UI after import.
+- Same gateway firmware: **≤26 enabled jobs** or reboot/wipe. Do not merge a full Deye job set onto the same IRIV without trimming; prefer **separate RS485** for Deye vs JK.
+
+## Sister project
+
+Deye inverter monitor: `deye-sg06-rs485-monitor` (9600 / slave 1 / `iriv/ivt`).

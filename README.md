@@ -2,7 +2,8 @@
 
 Field tools to **monitor** a JiKong **JK-PB\*** BMS over **Modbus RTU (RS485)** on UART1: PC poller, IRIV IOC MQTT template, BLE sketch stub, and (planned) ESP32 UART→RS485 poller.
 
-> Vietnamese: [README-vn.md](README-vn.md)
+> Vietnamese: [README-vn.md](README-vn.md)  
+> **Cursor / agent handoff:** [AGENTS.md](AGENTS.md) · [docs/HANDOFF.md](docs/HANDOFF.md) · `.cursor/rules/lab-context.mdc`
 
 **Sister project:** [deye-sg06-rs485-monitor](../deye-sg06-rs485-monitor) — Deye inverter Modbus (separate bus @ 9600).
 
