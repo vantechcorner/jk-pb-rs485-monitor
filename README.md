@@ -5,11 +5,6 @@ Field tools to **monitor** a JiKong **JK-PB\*** BMS over **Modbus RTU (RS485)** 
 > Vietnamese: [README-vn.md](README-vn.md)  
 > **Cursor / agent handoff:** [AGENTS.md](AGENTS.md) · [docs/HANDOFF.md](docs/HANDOFF.md) · `.cursor/rules/lab-context.mdc`
 
-**Tested by Van Tech Corner.**  
-**License:** [Creative Commons Attribution 4.0 International (CC BY 4.0)](LICENSE).
-
-> **Disclaimer / Cảnh báo an toàn:** Work carefully with batteries and BMS hardware. Short circuits or wiring mistakes can cause fire or explosion. / Hãy cẩn thận khi làm việc với pin và mạch BMS; chập mạch có thể gây cháy nổ.
-
 **Sister project:** [deye-sg06-rs485-monitor](../deye-sg06-rs485-monitor) — Deye inverter Modbus (separate bus @ 9600).
 
 ```text

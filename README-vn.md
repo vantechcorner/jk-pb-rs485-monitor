@@ -5,11 +5,6 @@ Bộ công cụ **monitor** BMS JiKong **JK-PB\*** qua **Modbus RTU (RS485)** tr
 > English: [README.md](README.md)  
 > **Cursor / agent handoff:** [AGENTS.md](AGENTS.md) · [docs/HANDOFF.md](docs/HANDOFF.md) · `.cursor/rules/lab-context.mdc`
 
-**Tested by Van Tech Corner.**  
-**License:** [Creative Commons Attribution 4.0 International (CC BY 4.0)](LICENSE).
-
-> **Cảnh báo an toàn:** Hãy cẩn thận khi làm việc với pin và mạch BMS. Chập mạch hoặc đấu sai dây có thể gây cháy nổ.
-
 **Dự án chị em:** [deye-sg06-rs485-monitor](../deye-sg06-rs485-monitor) — Modbus biến tần Deye (bus riêng @ 9600).
 
 ```text
