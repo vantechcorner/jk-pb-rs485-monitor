@@ -1,18 +1,25 @@
 # JK-PB RS485 Monitor
 
-Field tools to **monitor** a JiKong **JK-PB\*** BMS over **Modbus RTU (RS485)** on UART1: PC poller, IRIV IOC MQTT template, BLE sketch stub, and (planned) ESP32 UART→RS485 poller.
+Field tools to **monitor** a JiKong **JK-PB\*** BMS over **Modbus RTU (RS485)** on UART1: PC poller, Cytron **IRIV IOC** CircuitPython MQTT firmware (block read), web dashboard, Home Assistant sensors, JK Modbus slave emulator, and (planned) ESP32 RS485 poller.
 
 > Vietnamese: [README-vn.md](README-vn.md)  
 > **Cursor / agent handoff:** [AGENTS.md](AGENTS.md) · [docs/HANDOFF.md](docs/HANDOFF.md) · `.cursor/rules/lab-context.mdc`
 
+**Tested by Van Tech Corner.**  
+**License:** [Creative Commons Attribution 4.0 International (CC BY 4.0)](LICENSE).
+
+> **Disclaimer / Cảnh báo an toàn:** Work carefully with batteries and BMS hardware. Short circuits or wiring mistakes can cause fire or explosion. / Hãy cẩn thận khi làm việc với pin và mạch BMS; chập mạch có thể gây cháy nổ.
+
 **Sister project:** [deye-sg06-rs485-monitor](../deye-sg06-rs485-monitor) — Deye inverter Modbus (separate bus @ 9600).
 
 ```text
-  [ PC / IRIV / ESP32 ]  = Modbus MASTER
+  [ PC / IRIV IOC / ESP32 ]  = Modbus MASTER
               |
          RS485 A/B @ 115200
               |
   [ JK-PB* UART1 / leftmost RJ45 RS485 ]  = Modbus SLAVE
+              |
+         IRIV → MQTT iriv/jkbms/#  →  web / Home Assistant
 ```
 
 **One master per bus.** Do not share the cable with Deye datalogger RS485 or the inverter **CAN** link.
@@ -27,8 +34,10 @@ pip install -r requirements.txt
 
 | Hardware | Verified |
 |----------|----------|
-| **JK-PB1A16S10P** on **24 V 8S** (~50 Ah) research pack | UART1 protocol **001**, slave **15**, **115200** — PC poller + live cells/SOC/V/I |
-| Same BMS family on **16S 51.2 V 100 Ah** with Deye | Inverter link = **CAN**; for ESS telemetry prefer Deye Modbus (sister repo) |
+| **JK-PB1A16S10P** on **24 V 8S** (~50 Ah) research pack | UART1 **001**, slave **15**, **115200** — PC poller |
+| **IRIV IOC** CircuitPython firmware | Block FC03 → MQTT `172.16.10.40` / `iriv/jkbms/#` |
+| Web dashboard + Home Assistant MQTT | Live pack/cells OK (device **IRIV IOC - JK BMS**) |
+| Same BMS family on **16S 51.2 V 100 Ah** with Deye | Inverter = **CAN**; ESS telemetry via Deye Modbus (sister repo) |
 
 ![JK-PB1A16S10P main board](docs/images/jk-pb1a16s10p-board.jpg)
 
@@ -40,10 +49,25 @@ pip install -r requirements.txt
 
 *Device Address **15**; UART1/2 = **001** JK BMS RS485 Modbus; UART3 = **015** parallel.*
 
-<!-- Placeholder -->
 ![Setup — 24 V 8S pack](docs/images/setup-jk-24v-8s.jpg)
 
-*Placeholder: save as `docs/images/setup-jk-24v-8s.jpg`.*
+*Lab 24 V 8S research pack with JK-PB monitor path.*
+
+---
+
+## Screenshots — IRIV IOC - JK BMS
+
+![Web dashboard](docs/images/IRIV-IOC-JK-BMS-Web.png)
+
+*MQTT web UI (`web/`) — pack, SOC, cells (8S).*
+
+![Home Assistant device](docs/images/IRIV-IOC-JK-BMS-Home-Assistant.png)
+
+*Home Assistant device **IRIV IOC - JK BMS** (Cytron Technologies).*
+
+![Home Assistant sensor YAML](docs/images/IRIV-IOC-JK-BMS-Home-Assistant-Sensor-Config.png)
+
+*Manual MQTT sensor package in HA.*
 
 ---
 
@@ -52,9 +76,16 @@ pip install -r requirements.txt
 | Area | Files |
 |------|--------|
 | **PC poller (master)** | `jk-pb-modbus-read.py` |
-| **IRIV IOC MQTT** | `jkbms-iriv-ioc-config.json`, `_gen_jkbms_iriv_jobs.py` |
-| **BLE (optional)** | `jkbms-ble-gateway.yaml` (needs external component) |
-| **ESP32 poller** | `docs/esp32/README.md` (guide stub) |
+| **IRIV IOC** | [`iriv-ioc/`](iriv-ioc/) — install + MQTT broker: [`iriv-ioc/README.md`](iriv-ioc/README.md); firmware in `iriv-ioc/firmware/` |
+| **Web dashboard** | [`web/`](web/) — MQTT over WebSockets (`iriv/jkbms/#`) |
+| **Home Assistant** | [`homeassistant/`](homeassistant/) — device **IRIV IOC - JK BMS** by Cytron Technologies |
+| **Bench JK slave** | [`emulator/`](emulator/) — `jk-pb-emu.py` (JK protocol **001** live map) |
+| **ESP32 RS485 poller** | [`esp32/`](esp32/) (stub) |
+| **Datasheet** | [`iriv-ioc/`](iriv-ioc/) |
+
+Pack series **4S / 8S / 16S**: set `JK_CELLS` in firmware `settings.toml`, `CELL_COUNT` in `web/app.js`, and matching cell blocks in the HA YAML (lab default **8S**).
+
+Stock IRIV **MQTT Gateway** per-register JSON is **not** used (high latency).
 
 ---
 
@@ -76,24 +107,49 @@ python jk-pb-modbus-read.py --port COM35 --cells 8
 python jk-pb-modbus-read.py --port COM35 --cells 8 --once --full
 ```
 
-### IRIV
+### IRIV IOC
+
+Install and set the MQTT broker in [`iriv-ioc/README.md`](iriv-ioc/README.md).
+
+- Copy `iriv-ioc/firmware/` → CIRCUITPY  
+- Edit **`settings.toml`**: `MQTT_BROKER`, `MQTT_PORT`, `MQTT_BASE`, …  
+- Lab default broker: `172.16.10.40:1883`, base `iriv/jkbms`  
+- **One Modbus master** on the JK RS485 bus
+
+### Web dashboard
 
 ```bash
-python _gen_jkbms_iriv_jobs.py
+cd web && python -m http.server 8081
 ```
 
-Import `jkbms-iriv-ioc-config.json`. MQTT base: `iriv/jkbms`. Confirm UINT32/INT32 on pack V/I/P jobs after import.
+Open `http://127.0.0.1:8081`. Broker WebSocket (lab): `ws://172.16.10.40:9001`, prefix `iriv/jkbms`. See [web/README.md](web/README.md).
 
-**IRIV limit:** do not exceed **26** enabled poll jobs on the gateway firmware used in lab (27th → reboot + wipe). This JK template stays under that when used alone; do not merge with a full Deye job set on the **same** IRIV without trimming.
+### Home Assistant
+
+```text
+homeassistant/mqtt_cytron_iriv_ioc_jkbms.yaml
+```
+
+Device **IRIV IOC - JK BMS** · manufacturer **Cytron Technologies**. See [homeassistant/README.md](homeassistant/README.md).
+
+### JK Modbus slave emulator (bench)
+
+```bash
+python emulator/jk-pb-emu.py --port COM36 --cells 8 --debug --scenario day
+```
+
+Defaults: slave **15**, **115200**. See [emulator/README.md](emulator/README.md).
 
 ---
 
 ## ESP32 / S3 + UART→RS485 (planned)
 
-See [docs/esp32/README.md](docs/esp32/README.md).
+See [esp32/README.md](esp32/README.md).
 
 ---
 
-## License / lab note
+## License / credit / safety
 
-Lab toolkit for BMS research. Not a substitute for the inverter CAN BMS link on a live ESS.
+- **License:** [CC BY 4.0](LICENSE) (Creative Commons Attribution 4.0 International)
+- **Tested by:** Van Tech Corner
+- **Disclaimer:** Be careful when working with batteries and BMS circuits. Short circuits can cause fire or explosion. This is a lab toolkit, not a substitute for the inverter CAN BMS link on a live ESS.

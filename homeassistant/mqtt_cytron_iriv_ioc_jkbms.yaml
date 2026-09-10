@@ -1,0 +1,366 @@
+# Home Assistant — MQTT sensors for IRIV IOC - JK BMS
+#
+# Paste under `mqtt:` in configuration.yaml, or drop into packages/, then reload MQTT /
+# restart HA. Payload from IRIV firmware: {"value": <number>}
+#
+# Device: IRIV IOC - JK BMS
+# By:     Cytron Technologies
+# Topics: iriv/jkbms/...
+#
+# Match pack series to firmware settings.toml / web CELL_COUNT:
+#   4S  → enable cells 1–4 only
+#   8S  → cells 1–8  (lab — active below)
+#   16S → cells 1–16
+
+mqtt:
+  sensor:
+    # --- Pack ---
+    - name: "Pack Voltage"
+      unique_id: cytron_iriv_ioc_jkbms_pack_voltage
+      state_topic: "iriv/jkbms/pack/voltage"
+      value_template: "{{ value_json.value }}"
+      unit_of_measurement: "V"
+      device_class: voltage
+      state_class: measurement
+      suggested_display_precision: 3
+      device: &iriv_ioc_device
+        name: "IRIV IOC - JK BMS"
+        identifiers:
+          - cytron_iriv_ioc_jkbms
+        manufacturer: Cytron Technologies
+        model: IRIV IOC
+        sw_version: "jk-pb-mqtt"
+
+    - name: "Pack Current"
+      unique_id: cytron_iriv_ioc_jkbms_pack_current
+      state_topic: "iriv/jkbms/pack/current"
+      value_template: "{{ value_json.value }}"
+      unit_of_measurement: "A"
+      device_class: current
+      state_class: measurement
+      suggested_display_precision: 3
+      device: *iriv_ioc_device
+
+    - name: "Pack Power"
+      unique_id: cytron_iriv_ioc_jkbms_pack_power
+      state_topic: "iriv/jkbms/pack/power"
+      value_template: "{{ value_json.value }}"
+      unit_of_measurement: "W"
+      device_class: power
+      state_class: measurement
+      suggested_display_precision: 0
+      device: *iriv_ioc_device
+
+    - name: "SOC"
+      unique_id: cytron_iriv_ioc_jkbms_pack_soc
+      state_topic: "iriv/jkbms/pack/soc"
+      value_template: "{{ value_json.value }}"
+      unit_of_measurement: "%"
+      device_class: battery
+      state_class: measurement
+      suggested_display_precision: 0
+      device: *iriv_ioc_device
+
+    - name: "SOH"
+      unique_id: cytron_iriv_ioc_jkbms_pack_soh
+      state_topic: "iriv/jkbms/pack/soh"
+      value_template: "{{ value_json.value }}"
+      unit_of_measurement: "%"
+      state_class: measurement
+      suggested_display_precision: 0
+      device: *iriv_ioc_device
+
+    - name: "Remain Capacity"
+      unique_id: cytron_iriv_ioc_jkbms_pack_remain_ah
+      state_topic: "iriv/jkbms/pack/remain_ah"
+      value_template: "{{ value_json.value }}"
+      unit_of_measurement: "Ah"
+      state_class: measurement
+      suggested_display_precision: 2
+      device: *iriv_ioc_device
+
+    - name: "Full Capacity"
+      unique_id: cytron_iriv_ioc_jkbms_pack_full_ah
+      state_topic: "iriv/jkbms/pack/full_ah"
+      value_template: "{{ value_json.value }}"
+      unit_of_measurement: "Ah"
+      state_class: measurement
+      suggested_display_precision: 2
+      device: *iriv_ioc_device
+
+    - name: "Cycle Count"
+      unique_id: cytron_iriv_ioc_jkbms_pack_cycles
+      state_topic: "iriv/jkbms/pack/cycles"
+      value_template: "{{ value_json.value | int }}"
+      state_class: total_increasing
+      device: *iriv_ioc_device
+
+    - name: "Balance Current"
+      unique_id: cytron_iriv_ioc_jkbms_pack_balance_current
+      state_topic: "iriv/jkbms/pack/balance_current"
+      value_template: "{{ value_json.value }}"
+      unit_of_measurement: "A"
+      device_class: current
+      state_class: measurement
+      suggested_display_precision: 3
+      device: *iriv_ioc_device
+
+    - name: "Alarm Mask"
+      unique_id: cytron_iriv_ioc_jkbms_pack_alarm
+      state_topic: "iriv/jkbms/pack/alarm"
+      value_template: "{{ value_json.value | int }}"
+      device: *iriv_ioc_device
+
+    - name: "Runtime"
+      unique_id: cytron_iriv_ioc_jkbms_pack_runtime_s
+      state_topic: "iriv/jkbms/pack/runtime_s"
+      value_template: "{{ value_json.value | int }}"
+      unit_of_measurement: "s"
+      device_class: duration
+      state_class: total_increasing
+      device: *iriv_ioc_device
+
+    # --- Temps ---
+    - name: "MOS Temperature"
+      unique_id: cytron_iriv_ioc_jkbms_temp_mos
+      state_topic: "iriv/jkbms/temp/mos"
+      value_template: "{{ value_json.value }}"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      suggested_display_precision: 1
+      device: *iriv_ioc_device
+
+    - name: "Battery Temp 1"
+      unique_id: cytron_iriv_ioc_jkbms_temp_battery1
+      state_topic: "iriv/jkbms/temp/battery1"
+      value_template: "{{ value_json.value }}"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      suggested_display_precision: 1
+      device: *iriv_ioc_device
+
+    - name: "Battery Temp 2"
+      unique_id: cytron_iriv_ioc_jkbms_temp_battery2
+      state_topic: "iriv/jkbms/temp/battery2"
+      value_template: "{{ value_json.value }}"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      suggested_display_precision: 1
+      device: *iriv_ioc_device
+
+    # --- Cell summary ---
+    - name: "Cell Average"
+      unique_id: cytron_iriv_ioc_jkbms_cells_average
+      state_topic: "iriv/jkbms/cells/average"
+      value_template: "{{ value_json.value }}"
+      unit_of_measurement: "V"
+      device_class: voltage
+      state_class: measurement
+      suggested_display_precision: 3
+      device: *iriv_ioc_device
+
+    - name: "Cell Delta Max"
+      unique_id: cytron_iriv_ioc_jkbms_cells_delta_max
+      state_topic: "iriv/jkbms/cells/delta_max"
+      value_template: "{{ value_json.value }}"
+      unit_of_measurement: "V"
+      device_class: voltage
+      state_class: measurement
+      suggested_display_precision: 3
+      device: *iriv_ioc_device
+
+    # --- Cells: 4S (uncomment for 12 V pack) ---
+    # - name: "Cell 1"
+    #   unique_id: cytron_iriv_ioc_jkbms_cell_1
+    #   state_topic: "iriv/jkbms/cells/1"
+    #   value_template: "{{ value_json.value }}"
+    #   unit_of_measurement: "V"
+    #   device_class: voltage
+    #   state_class: measurement
+    #   suggested_display_precision: 3
+    #   device: *iriv_ioc_device
+    # - name: "Cell 2"
+    #   unique_id: cytron_iriv_ioc_jkbms_cell_2
+    #   state_topic: "iriv/jkbms/cells/2"
+    #   value_template: "{{ value_json.value }}"
+    #   unit_of_measurement: "V"
+    #   device_class: voltage
+    #   state_class: measurement
+    #   suggested_display_precision: 3
+    #   device: *iriv_ioc_device
+    # - name: "Cell 3"
+    #   unique_id: cytron_iriv_ioc_jkbms_cell_3
+    #   state_topic: "iriv/jkbms/cells/3"
+    #   value_template: "{{ value_json.value }}"
+    #   unit_of_measurement: "V"
+    #   device_class: voltage
+    #   state_class: measurement
+    #   suggested_display_precision: 3
+    #   device: *iriv_ioc_device
+    # - name: "Cell 4"
+    #   unique_id: cytron_iriv_ioc_jkbms_cell_4
+    #   state_topic: "iriv/jkbms/cells/4"
+    #   value_template: "{{ value_json.value }}"
+    #   unit_of_measurement: "V"
+    #   device_class: voltage
+    #   state_class: measurement
+    #   suggested_display_precision: 3
+    #   device: *iriv_ioc_device
+
+    # --- Cells: 8S lab (active) — cells 1–8 ---
+    - name: "Cell 1"
+      unique_id: cytron_iriv_ioc_jkbms_cell_1
+      state_topic: "iriv/jkbms/cells/1"
+      value_template: "{{ value_json.value }}"
+      unit_of_measurement: "V"
+      device_class: voltage
+      state_class: measurement
+      suggested_display_precision: 3
+      device: *iriv_ioc_device
+
+    - name: "Cell 2"
+      unique_id: cytron_iriv_ioc_jkbms_cell_2
+      state_topic: "iriv/jkbms/cells/2"
+      value_template: "{{ value_json.value }}"
+      unit_of_measurement: "V"
+      device_class: voltage
+      state_class: measurement
+      suggested_display_precision: 3
+      device: *iriv_ioc_device
+
+    - name: "Cell 3"
+      unique_id: cytron_iriv_ioc_jkbms_cell_3
+      state_topic: "iriv/jkbms/cells/3"
+      value_template: "{{ value_json.value }}"
+      unit_of_measurement: "V"
+      device_class: voltage
+      state_class: measurement
+      suggested_display_precision: 3
+      device: *iriv_ioc_device
+
+    - name: "Cell 4"
+      unique_id: cytron_iriv_ioc_jkbms_cell_4
+      state_topic: "iriv/jkbms/cells/4"
+      value_template: "{{ value_json.value }}"
+      unit_of_measurement: "V"
+      device_class: voltage
+      state_class: measurement
+      suggested_display_precision: 3
+      device: *iriv_ioc_device
+
+    - name: "Cell 5"
+      unique_id: cytron_iriv_ioc_jkbms_cell_5
+      state_topic: "iriv/jkbms/cells/5"
+      value_template: "{{ value_json.value }}"
+      unit_of_measurement: "V"
+      device_class: voltage
+      state_class: measurement
+      suggested_display_precision: 3
+      device: *iriv_ioc_device
+
+    - name: "Cell 6"
+      unique_id: cytron_iriv_ioc_jkbms_cell_6
+      state_topic: "iriv/jkbms/cells/6"
+      value_template: "{{ value_json.value }}"
+      unit_of_measurement: "V"
+      device_class: voltage
+      state_class: measurement
+      suggested_display_precision: 3
+      device: *iriv_ioc_device
+
+    - name: "Cell 7"
+      unique_id: cytron_iriv_ioc_jkbms_cell_7
+      state_topic: "iriv/jkbms/cells/7"
+      value_template: "{{ value_json.value }}"
+      unit_of_measurement: "V"
+      device_class: voltage
+      state_class: measurement
+      suggested_display_precision: 3
+      device: *iriv_ioc_device
+
+    - name: "Cell 8"
+      unique_id: cytron_iriv_ioc_jkbms_cell_8
+      state_topic: "iriv/jkbms/cells/8"
+      value_template: "{{ value_json.value }}"
+      unit_of_measurement: "V"
+      device_class: voltage
+      state_class: measurement
+      suggested_display_precision: 3
+      device: *iriv_ioc_device
+
+    # --- Cells: 16S ESS (uncomment cells 9–16; keep 1–8 above) ---
+    # - name: "Cell 9"
+    #   unique_id: cytron_iriv_ioc_jkbms_cell_9
+    #   state_topic: "iriv/jkbms/cells/9"
+    #   value_template: "{{ value_json.value }}"
+    #   unit_of_measurement: "V"
+    #   device_class: voltage
+    #   state_class: measurement
+    #   suggested_display_precision: 3
+    #   device: *iriv_ioc_device
+    # - name: "Cell 10"
+    #   unique_id: cytron_iriv_ioc_jkbms_cell_10
+    #   state_topic: "iriv/jkbms/cells/10"
+    #   value_template: "{{ value_json.value }}"
+    #   unit_of_measurement: "V"
+    #   device_class: voltage
+    #   state_class: measurement
+    #   suggested_display_precision: 3
+    #   device: *iriv_ioc_device
+    # - name: "Cell 11"
+    #   unique_id: cytron_iriv_ioc_jkbms_cell_11
+    #   state_topic: "iriv/jkbms/cells/11"
+    #   value_template: "{{ value_json.value }}"
+    #   unit_of_measurement: "V"
+    #   device_class: voltage
+    #   state_class: measurement
+    #   suggested_display_precision: 3
+    #   device: *iriv_ioc_device
+    # - name: "Cell 12"
+    #   unique_id: cytron_iriv_ioc_jkbms_cell_12
+    #   state_topic: "iriv/jkbms/cells/12"
+    #   value_template: "{{ value_json.value }}"
+    #   unit_of_measurement: "V"
+    #   device_class: voltage
+    #   state_class: measurement
+    #   suggested_display_precision: 3
+    #   device: *iriv_ioc_device
+    # - name: "Cell 13"
+    #   unique_id: cytron_iriv_ioc_jkbms_cell_13
+    #   state_topic: "iriv/jkbms/cells/13"
+    #   value_template: "{{ value_json.value }}"
+    #   unit_of_measurement: "V"
+    #   device_class: voltage
+    #   state_class: measurement
+    #   suggested_display_precision: 3
+    #   device: *iriv_ioc_device
+    # - name: "Cell 14"
+    #   unique_id: cytron_iriv_ioc_jkbms_cell_14
+    #   state_topic: "iriv/jkbms/cells/14"
+    #   value_template: "{{ value_json.value }}"
+    #   unit_of_measurement: "V"
+    #   device_class: voltage
+    #   state_class: measurement
+    #   suggested_display_precision: 3
+    #   device: *iriv_ioc_device
+    # - name: "Cell 15"
+    #   unique_id: cytron_iriv_ioc_jkbms_cell_15
+    #   state_topic: "iriv/jkbms/cells/15"
+    #   value_template: "{{ value_json.value }}"
+    #   unit_of_measurement: "V"
+    #   device_class: voltage
+    #   state_class: measurement
+    #   suggested_display_precision: 3
+    #   device: *iriv_ioc_device
+    # - name: "Cell 16"
+    #   unique_id: cytron_iriv_ioc_jkbms_cell_16
+    #   state_topic: "iriv/jkbms/cells/16"
+    #   value_template: "{{ value_json.value }}"
+    #   unit_of_measurement: "V"
+    #   device_class: voltage
+    #   state_class: measurement
+    #   suggested_display_precision: 3
+    #   device: *iriv_ioc_device

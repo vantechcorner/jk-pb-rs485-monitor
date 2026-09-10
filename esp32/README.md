@@ -4,7 +4,7 @@
 
 ## Goal
 
-Modbus RTU **master** on ESP32/S3 → JK UART1 (leftmost RJ45 **RS485**), publish MQTT aligned with `jkbms-iriv-ioc-config.json` (`iriv/jkbms/...`).
+Modbus RTU **master** on ESP32/S3 → JK UART1 (leftmost RJ45 **RS485**), publish MQTT aligned with [`iriv-ioc/firmware/`](../../iriv-ioc/firmware/) topics (`iriv/jkbms/...`).
 
 ## Constraints
 
@@ -17,4 +17,4 @@ Modbus RTU **master** on ESP32/S3 → JK UART1 (leftmost RJ45 **RS485**), publis
 
 ## Registers
 
-Use the map in `jk-pb-modbus-read.py` / `_gen_jkbms_iriv_jobs.py` (pack V/I/P as u32/s32, cells as u16 mV).
+Use the map in `jk-pb-modbus-read.py` / `iriv-ioc/firmware/lib/jk_bms.py` (pack V/I/P as u32/s32, cells as u16 mV).

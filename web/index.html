@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#010409">
+  <title>JK-PB BMS Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="status-bar">
+    <span id="sb-mqtt" class="sb-item muted">MQTT --</span>
+    <span class="sb-sep">|</span>
+    <span id="sb-feed" class="sb-item muted" title="Live = IRIV publish after connect; Retain = broker cache only">Feed —</span>
+    <span class="sb-sep">|</span>
+    <span id="sb-state" class="sb-item muted">—</span>
+    <span class="sb-sep">|</span>
+    <span id="sb-mos" class="sb-item muted">MOS —</span>
+    <span class="sb-sep">|</span>
+    <span id="sb-balance" class="sb-item muted">Bal —</span>
+    <div class="sb-right">
+      <span id="sb-clock" class="sb-item">--/--/---- --:--:--</span>
+      <button type="button" id="btn-settings" class="sb-gear" title="Broker settings" aria-label="Broker settings">⚙</button>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="hero-row">
+      <article class="card soc-card">
+        <h2>SOC</h2>
+        <div class="soc-wrap">
+          <svg class="soc-svg" viewBox="0 0 120 120" aria-hidden="true">
+            <circle class="soc-track" cx="60" cy="60" r="50"></circle>
+            <circle id="soc-ind" class="soc-ind" cx="60" cy="60" r="50"></circle>
+          </svg>
+          <div id="home-soc" class="soc-val">—</div>
+        </div>
+        <div id="batt-segs" class="pwr-segs" aria-hidden="true"></div>
+        <div id="home-batt-p" class="hero muted">—</div>
+        <p id="home-batt-dir" class="sub muted">—</p>
+      </article>
+
+      <div class="hero-metrics">
+        <article class="card">
+          <h2>Pack voltage</h2>
+          <div data-m="pack/voltage" class="metric">—</div>
+        </article>
+        <article class="card">
+          <h2>Current</h2>
+          <div data-m="pack/current" data-signed class="metric">—</div>
+        </article>
+        <article class="card">
+          <h2>Power</h2>
+          <div data-m="pack/power" data-signed class="metric">—</div>
+        </article>
+        <article class="card">
+          <h2>Capacity</h2>
+          <div id="home-capacity" class="metric metric-sm">—</div>
+          <div class="meta-row">
+            <span data-m="pack/soh">—</span>
+            <span data-m="pack/cycles">—</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="metric-grid">
+      <article class="card">
+        <h2>Cell average</h2>
+        <div data-m="cells/average" class="metric metric-sm">—</div>
+      </article>
+      <article class="card">
+        <h2>Δ max</h2>
+        <div data-m="cells/delta_max" class="metric metric-sm">—</div>
+      </article>
+      <article class="card">
+        <h2>Balance current</h2>
+        <div data-m="pack/balance_current" class="metric metric-sm">—</div>
+      </article>
+      <article class="card">
+        <h2>MOS temp</h2>
+        <div data-m="temp/mos" class="metric metric-sm">—</div>
+      </article>
+      <article class="card">
+        <h2>Battery temp 1</h2>
+        <div data-m="temp/battery1" class="metric metric-sm">—</div>
+      </article>
+      <article class="card">
+        <h2>Battery temp 2</h2>
+        <div data-m="temp/battery2" class="metric metric-sm">—</div>
+      </article>
+      <article class="card">
+        <h2>Runtime</h2>
+        <div id="home-runtime" class="metric metric-sm">—</div>
+      </article>
+      <article class="card">
+        <h2>Alarm</h2>
+        <div id="home-alarm" class="metric metric-sm">—</div>
+      </article>
+    </section>
+
+    <section class="card cells-card">
+      <div class="cells-head">
+        <h2>Cells</h2>
+        <span id="cells-summary" class="muted">8S · min/max —</span>
+      </div>
+      <div id="cells-grid" class="cells-grid"></div>
+    </section>
+  </main>
+
+  <dialog id="settings">
+    <form id="settings-form" method="dialog">
+      <h2>MQTT WebSocket</h2>
+      <p class="hint">Browser clients cannot use port 1883. Enable a WebSocket listener on the broker (usually 9001).</p>
+      <label>Broker URL
+        <input id="cfg-url" type="text" autocomplete="off" spellcheck="false" placeholder="ws://172.16.10.40:9001">
+      </label>
+      <label>Username
+        <input id="cfg-user" type="text" autocomplete="username">
+      </label>
+      <label>Password
+        <input id="cfg-pass" type="password" autocomplete="current-password">
+      </label>
+      <label>Topic prefix
+        <input id="cfg-prefix" type="text" spellcheck="false" placeholder="iriv/jkbms">
+      </label>
+      <div class="dialog-actions">
+        <button type="submit" value="connect" class="primary">Connect</button>
+        <button type="button" id="btn-disconnect">Disconnect</button>
+        <button type="button" id="btn-close">Close</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="vendor/mqtt.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

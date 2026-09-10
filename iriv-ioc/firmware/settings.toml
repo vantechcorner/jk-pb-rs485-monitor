@@ -1,0 +1,22 @@
+# JK-PB BMS MQTT poller — IRIV IOC - JK BMS (Cytron Technologies / CircuitPython)
+# Edit on the CIRCUITPY drive, then soft-reset the board.
+
+MQTT_BROKER = "172.16.10.40"
+MQTT_PORT = 1883
+MQTT_BASE = "iriv/jkbms"
+MQTT_CLIENT_ID = "iriv-ioc-jkbms"
+MQTT_USER = ""
+MQTT_PASS = ""
+MQTT_QOS = 1
+MQTT_RETAIN = "true"
+
+JK_SLAVE = 15
+JK_BAUD = 115200
+
+# --- Pack series (uncomment exactly one) ---
+# JK_CELLS = 4   # 4S  (~12 V class)
+JK_CELLS = 8     # 8S  (~24 V) — lab research pack (active)
+# JK_CELLS = 16  # 16S (~48–51.2 V ESS)
+
+JK_TIMEOUT_S = "1.0"
+POLL_MS = 1000

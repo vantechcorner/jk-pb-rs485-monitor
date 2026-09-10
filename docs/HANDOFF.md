@@ -11,11 +11,14 @@ Tools to **read** JiKong **JK-PB\*** BMS telemetry over **Modbus RTU** on the mo
 
 1. Wiring / app / register notes (+ photos)  
 2. Python **Modbus master** poller for PC + USB-RS485  
-3. Cytron **IRIV IOC MQTT** JSON template  
-4. Optional BLE ESPHome stub  
-5. Planned: **ESP32/S3 + UART→RS485** master (`docs/esp32/`)
+3. Cytron **IRIV IOC** — CircuitPython block-read MQTT firmware ([`iriv-ioc/firmware/`](../iriv-ioc/firmware/))  
+4. Web dashboard + Home Assistant (**IRIV IOC - JK BMS** / Cytron Technologies)  
+5. Planned: **ESP32/S3 + UART→RS485** master (`esp32/`)
+6. Optional **JK-PB Modbus slave emulator** (`emulator/jk-pb-emu.py`) for bench without a real BMS  
 
-**Not in scope:** replacing the inverter **CAN** BMS link; Pylon-style emulator (lives with Deye repo as optional bench slave).
+Stock IRIV MQTT Gateway JSON was removed (high latency).
+
+**Not in scope:** replacing the inverter **CAN** BMS link.
 
 ---
 
@@ -27,7 +30,7 @@ Tools to **read** JiKong **JK-PB\*** BMS telemetry over **Modbus RTU** on the mo
 Waveshare USB-RS485 ──RS485@115200──► JK I/O "RS485" (UART1) ── slave 15
          ▲
    PC: jk-pb-modbus-read.py
-   or IRIV → MQTT iriv/jkbms/#
+   or IRIV IOC CircuitPython firmware → MQTT iriv/jkbms/#
 ```
 
 Example live read (8S): ~26.56 V, SOC ~67%, 33.5/50 Ah, cell Δ ~1–3 mV.
@@ -70,13 +73,15 @@ python jk-pb-modbus-read.py --port COMxx --cells 8 --once --full --trace
 
 ## 5. IRIV
 
-```bash
-python _gen_jkbms_iriv_jobs.py
-```
+CircuitPython block-read firmware — see [`iriv-ioc/firmware/README.md`](../iriv-ioc/firmware/README.md).
 
-- Updates `jkbms-iriv-ioc-config.json` **in place** (no dependency on Deye JSON).  
-- Slave **15**, baud **115200**, topics under `iriv/jkbms/`.  
-- Lab IRIV firmware: **≤26 enabled jobs** or reboot/wipe.
+- One FC03 live block `0x1200` × 98 words → decode → MQTT `iriv/jkbms/...` @ **172.16.10.40** (DHCP on W5500).
+- **One master only** on that RS485 bus.
+- Pack series: `JK_CELLS` = **4 | 8 | 16** (lab **8S**); keep web `CELL_COUNT` and HA cell blocks in sync.
+- Consumers: [`web/`](../web/), Home Assistant device **IRIV IOC - JK BMS** ([`homeassistant/`](../homeassistant/)) by **Cytron Technologies**.
+- Web dashboard marks broker **retain** vs **live** publishes in the status bar.
+
+Stock IRIV **MQTT Gateway** per-register job JSON is **not** maintained here (high poll latency).
 
 ---
 
@@ -99,7 +104,7 @@ Community refs used during research: phinix / esphome-jk-bms / YamBMS JK-PB docs
 
 ## 7. Next work (ESP32)
 
-Implement `docs/esp32/README.md`: ESP32-S3 master @ 115200 → same MQTT topics as IRIV JK config.
+Implement `esp32/README.md`: ESP32-S3 master @ 115200 → same MQTT topics as IRIV JK config.
 
 ---
 
