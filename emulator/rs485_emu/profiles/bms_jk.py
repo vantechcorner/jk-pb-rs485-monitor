@@ -31,7 +31,7 @@ class JkSimState:
     cells: int = 8
     soc: float = 67.0
     soh: float = 100.0
-    current_a: float = 0.5  # + discharge, − charge (JK convention in this lab)
+    current_a: float = 0.5  # + charge, − discharge (JK-PB protocol 001, field-verified)
     temp_mos: float = 32.0
     temp1: float = 28.5
     temp2: float = 28.0
@@ -108,20 +108,20 @@ class JkPbSimulator:
     def tick(self, dt: float) -> None:
         st = self.state
         if st.scenario == "night":
-            target_i = -st.rng.uniform(1.0, 5.0)  # charge
+            target_i = st.rng.uniform(1.0, 5.0)  # charge
         elif st.scenario == "cloud":
-            target_i = st.rng.uniform(-8.0, 12.0)
+            target_i = st.rng.uniform(-12.0, 8.0)
         elif st.scenario == "fault":
             target_i = 0.0
         else:
-            target_i = st.rng.uniform(-3.0, 8.0)
+            target_i = st.rng.uniform(-8.0, 3.0)
 
         st.current_a += (target_i - st.current_a) * min(1.0, dt * 0.4)
         if st.scenario == "fault":
             st.current_a = 0.0
 
-        # Ah accounting (full_ah nominal)
-        st.remain_ah -= st.current_a * dt / 3600.0
+        # Ah accounting: +current = charge
+        st.remain_ah += st.current_a * dt / 3600.0
         st.remain_ah = max(1.0, min(st.full_ah, st.remain_ah))
         st.soc = 100.0 * st.remain_ah / st.full_ah
         st.runtime_s = (st.runtime_s + int(dt)) & 0xFFFFFFFF

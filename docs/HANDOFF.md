@@ -10,7 +10,7 @@
 Tools to **read** JiKong **JK-PB\*** BMS telemetry over **Modbus RTU** on the monitor RS485 port (UART1):
 
 1. Wiring / app / register notes (+ photos)  
-2. Python **Modbus master** poller for PC + USB-RS485  
+2. Python **Modbus master** for PC + USB-RS485 — `jk-pb-modbus-read.py` (FC03) and `jk-pb-modbus-write.py` (FC16 limits / balance)  
 3. Cytron **IRIV IOC** — CircuitPython block-read MQTT firmware ([`iriv-ioc/firmware/`](../iriv-ioc/firmware/))  
 4. Web dashboard + Home Assistant (**IRIV IOC - JK BMS** / Cytron Technologies)  
 5. Planned: **ESP32/S3 + UART→RS485** master (`esp32/`)
@@ -50,6 +50,8 @@ Photos in `docs/images/`:
 - `jk-pb1a16s10p-board.jpg` — main BMS  
 - `jk-pb-io-board-rs485.jpg` — I/O V1.02 + pin table  
 - `jk-app-uart-settings.png` — address 15, UART 001/001/015  
+- `JK-BMS-RS485-python-read.png` — PC `--full` read  
+- `JK-BMS-RS485-python-charger-monitor.png` — terminal charge monitor  
 
 | Port | Use |
 |------|-----|
@@ -65,9 +67,14 @@ Photos in `docs/images/`:
 pip install -r requirements.txt
 python jk-pb-modbus-read.py --port COMxx --cells 8
 python jk-pb-modbus-read.py --port COMxx --cells 8 --once --full --trace
+python jk-pb-charge-monitor.py --port COMxx --cells 8
+python jk-pb-modbus-write.py --port COMxx --set-charge-a 10 --balance on
+python jk-pb-modbus-write.py --port COMxx --set-charge-a 10 --yes
 ```
 
-`--full` also reads protection block `0x1000` and device info `0x1400` (model/HW/SW/SN).
+`jk-pb-charge-monitor.py` is a read-only terminal dashboard (pack V, charge A, balance A, power, ETA, cells) that refreshes in place.
+
+`jk-pb-modbus-write.py` writes continuous charge/discharge current (`0x102C` / `0x1038`) and balance switch (`0x1078`) via FC16. Dry-run unless `--yes`. Caps: 0.5–100 A charge, 1–100 A discharge.
 
 ---
 
@@ -94,7 +101,7 @@ Stock IRIV **MQTT Gateway** per-register job JSON is **not** maintained here (hi
 | `0x128A` | s16 | ×0.1 °C | MOS |
 | `0x1290` | u32 | ×0.001 V | Pack V |
 | `0x1294` | s32 | ×0.001 W | Power |
-| `0x1298` | s32 | ×0.001 A | Current |
+| `0x1298` | s32 | ×0.001 A | Current (**+ charge / − discharge**) |
 | `0x12A6` | u16 | low = SOC % | high = bal state |
 | `0x12A8` / `0x12AC` | s32/u32 | ×0.001 Ah | Remain / full |
 

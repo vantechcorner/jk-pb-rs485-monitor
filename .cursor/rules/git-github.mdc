@@ -1,0 +1,13 @@
+---
+description: Commit and push with local git plus GitHub (gh) already configured
+alwaysApply: true
+---
+
+# Git / GitHub
+
+When asked to commit, push, or open a PR for this repo:
+
+- Use **git** and the **GitHub CLI (`gh`)** already on this machine. Do not ask to re-auth, install `gh`, or set up a remote unless a command actually fails.
+- Remote is `origin` → `https://github.com/vantechcorner/jk-pb-rs485-monitor.git`. Default branch is `main`.
+- Commit only when asked (or when a push clearly requires a new commit). Then `git push -u origin HEAD` (or `gh`) with `all` permissions on Windows.
+- Never `git config`, force-push to `main`, or skip hooks unless explicitly requested.

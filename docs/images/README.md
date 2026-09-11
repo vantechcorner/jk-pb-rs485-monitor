@@ -9,3 +9,5 @@
 | `IRIV-IOC-JK-BMS-Web.png` | Web MQTT dashboard (live 8S) |
 | `IRIV-IOC-JK-BMS-Home-Assistant.png` | HA device **IRIV IOC - JK BMS** |
 | `IRIV-IOC-JK-BMS-Home-Assistant-Sensor-Config.png` | HA MQTT sensor YAML / editor |
+| `JK-BMS-RS485-python-read.png` | PC `jk-pb-modbus-read.py --full` |
+| `JK-BMS-RS485-python-charger-monitor.png` | PC `jk-pb-charge-monitor.py` |

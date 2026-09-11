@@ -31,3 +31,5 @@ Monitor a **JK-PB\*** BMS over **Modbus RTU** on **UART1** (leftmost RJ45 labele
 ## Bench emulator
 
 `emulator/jk-pb-emu.py` — JK-PB Modbus RTU **slave** (protocol **001** live map @ 0x1200). Use to exercise masters without a real BMS.
+
+PC CLIs: `jk-pb-modbus-read.py` is FC03 only (incl. PIN/password via `--full`). Writes go through `jk-pb-modbus-write.py`. Charge watch: `jk-pb-charge-monitor.py`.

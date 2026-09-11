@@ -32,18 +32,20 @@ RJ45 RS485 pinout: **1/8 = B**, **2/7 = A**, **3/6 = GND**. Swap A/B if silent.
 ## Modbus map notes
 
 - Docs use byte-stride addresses (`0x1200`, `0x1202`, …). Word index in a block: `(addr - start) // 2`.
-- Pack V `0x1290` u32 ×0.001 V; current `0x1298` s32 ×0.001 A; power `0x1294` s32 ×0.001 W.
+- Pack V `0x1290` u32 ×0.001 V; current `0x1298` s32 ×0.001 A (**+ charge / − discharge**, verified while charging); power `0x1294` s32 ×0.001 W.
 - SOC = **low byte** of `0x12A6` (high byte = balance state).
 - Cells: `0x1200 + 2*n`, u16 mV.
 
 ## Key files
 
-- `jk-pb-modbus-read.py` — PC Modbus **master** (`--cells 8`, `--full`, `--trace`)
+- `jk-pb-modbus-read.py` — PC Modbus **master** read (`--cells 8`, `--full`, `--trace`)
+- `jk-pb-charge-monitor.py` — terminal charge dashboard (auto-refresh, read-only)
+- `jk-pb-modbus-write.py` — charge/discharge current + balance switch (FC16, `--yes`)
 - `iriv-ioc/` — IRIV install + MQTT broker settings (`README.md`); firmware in `iriv-ioc/firmware/`
 - `homeassistant/` — HA MQTT package (**IRIV IOC - JK BMS** / Cytron Technologies)
 - `web/` — MQTT WebSocket dashboard
 - `emulator/jk-pb-emu.py` — JK-PB Modbus **slave** (protocol 001 live map; bench)
-- Photos: `docs/images/jk-*.jpg|png`, `IRIV-IOC-JK-BMS-*.png`
+- Photos: `docs/images/jk-*.jpg|png`, `IRIV-IOC-JK-BMS-*.png`, `JK-BMS-RS485-python-*.png`
 - `docs/HANDOFF.md` — full narrative
 - `esp32/README.md` — planned ESP32 RS485 master stub
 

@@ -70,7 +70,7 @@ pip install -r requirements.txt
 
 | Khu vực | File |
 |---------|------|
-| **PC poller (master)** | `jk-pb-modbus-read.py` |
+| **PC poller (master)** | `jk-pb-modbus-read.py` (đọc) · `jk-pb-modbus-write.py` (giới hạn dòng / balancer) · `jk-pb-charge-monitor.py` (màn hình sạc) |
 | **IRIV IOC** | [`iriv-ioc/`](iriv-ioc/) — cài đặt + broker MQTT: [`iriv-ioc/README.md`](iriv-ioc/README.md); firmware trong `iriv-ioc/firmware/` |
 | **Web dashboard** | [`web/`](web/) — MQTT qua WebSockets (`iriv/jkbms/#`) |
 | **Home Assistant** | [`homeassistant/`](homeassistant/) — thiết bị **IRIV IOC - JK BMS** by Cytron Technologies |
@@ -101,6 +101,35 @@ Thanh ghi chính: cells `0x1200+`; pack V `0x1290` u32×0.001; current `0x1298` 
 python jk-pb-modbus-read.py --port COM35 --cells 8
 python jk-pb-modbus-read.py --port COM35 --cells 8 --once --full
 ```
+
+`--full` in thêm BLE PIN và mật khẩu Authorize Settings từ `0x1400`. Chỉ đọc.
+
+![PC Modbus read](docs/images/JK-BMS-RS485-python-read.png)
+
+*`jk-pb-modbus-read.py --once --full` — pack/cells live, block bảo vệ, thông tin thiết bị.*
+
+### Theo dõi sạc (terminal)
+
+```bash
+python jk-pb-charge-monitor.py --port COM35 --cells 8
+python jk-pb-charge-monitor.py --port COM35 --cells 8 --interval 1
+```
+
+Màn hình PowerShell tự refresh: điện áp pack, dòng sạc, dòng cân bằng, công suất, thời gian sạc còn lại, điện áp từng cell. Ctrl+C để thoát. Chỉ đọc.
+
+![PC charge monitor](docs/images/JK-BMS-RS485-python-charger-monitor.png)
+
+*`jk-pb-charge-monitor.py` — theo dõi sạc trên terminal, tự refresh.*
+
+### PC writer
+
+```bash
+python jk-pb-modbus-write.py --port COM35
+python jk-pb-modbus-write.py --port COM35 --set-charge-a 10 --set-discharge-a 50 --balance on
+python jk-pb-modbus-write.py --port COM35 --set-charge-a 10 --yes
+```
+
+FC16 tới `CurBatCOC` (`0x102C`), `CurBatDcOC` (`0x1038`), `BalanEN` (`0x1078`). Không có `--yes` thì chỉ dry-run. Phạm vi: sạc 0.5–100 A, xả 1–100 A. Không ghi OVP/UVP/MOS.
 
 ### IRIV IOC
 

@@ -70,7 +70,7 @@ pip install -r requirements.txt
 
 | Area | Files |
 |------|--------|
-| **PC poller (master)** | `jk-pb-modbus-read.py` |
+| **PC poller (master)** | `jk-pb-modbus-read.py` (read) · `jk-pb-modbus-write.py` (limits / balance) · `jk-pb-charge-monitor.py` (live charge screen) |
 | **IRIV IOC** | [`iriv-ioc/`](iriv-ioc/) — install + MQTT broker: [`iriv-ioc/README.md`](iriv-ioc/README.md); firmware in `iriv-ioc/firmware/` |
 | **Web dashboard** | [`web/`](web/) — MQTT over WebSockets (`iriv/jkbms/#`) |
 | **Home Assistant** | [`homeassistant/`](homeassistant/) — device **IRIV IOC - JK BMS** by Cytron Technologies |
@@ -101,6 +101,35 @@ Key regs: cells `0x1200+`; pack V `0x1290` u32×0.001; current `0x1298` s32×0.0
 python jk-pb-modbus-read.py --port COM35 --cells 8
 python jk-pb-modbus-read.py --port COM35 --cells 8 --once --full
 ```
+
+`--full` also prints BLE PIN and the Authorize Settings password from `0x1400`. Read-only.
+
+![PC Modbus read](docs/images/JK-BMS-RS485-python-read.png)
+
+*`jk-pb-modbus-read.py --once --full` — live pack/cells, protection block, device info.*
+
+### Charge monitor (terminal)
+
+```bash
+python jk-pb-charge-monitor.py --port COM35 --cells 8
+python jk-pb-charge-monitor.py --port COM35 --cells 8 --interval 1
+```
+
+Live full-screen view: pack V, charge current, balance current, power, remaining charge time, cell voltages. Ctrl+C to quit. Read-only.
+
+![PC charge monitor](docs/images/JK-BMS-RS485-python-charger-monitor.png)
+
+*`jk-pb-charge-monitor.py` — auto-refresh terminal view while charging.*
+
+### PC writer
+
+```bash
+python jk-pb-modbus-write.py --port COM35
+python jk-pb-modbus-write.py --port COM35 --set-charge-a 10 --set-discharge-a 50 --balance on
+python jk-pb-modbus-write.py --port COM35 --set-charge-a 10 --yes
+```
+
+FC16 to `CurBatCOC` (`0x102C`), `CurBatDcOC` (`0x1038`), `BalanEN` (`0x1078`). Without `--yes` this is a dry-run. Range: charge 0.5–100 A, discharge 1–100 A (PB 100 A class). Does not write OVP/UVP/MOS.
 
 ### IRIV IOC
 

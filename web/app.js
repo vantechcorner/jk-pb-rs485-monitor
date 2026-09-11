@@ -268,10 +268,10 @@ function batteryState() {
     return "unknown";
   }
   const thr = v !== null ? 0.5 : 0.05;
-  if (n < -thr) {
+  if (n > thr) {
     return "charging";
   }
-  if (n > thr) {
+  if (n < -thr) {
     return "discharging";
   }
   return "idle";
